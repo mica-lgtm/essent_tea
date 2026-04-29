@@ -7,7 +7,7 @@ Genera HTML completo con placeholders que los 5 agentes reemplazan.
 PLACEHOLDER_DEFAULTS = {
     "{HEADLINE}":         "Descubrí el té que transforma tu ritual diario",
     "{SUBHEADER}":        "Tés premium en hebras, seleccionados en origen. Para quien sabe lo que quiere.",
-    "{CTA_TEXT}":         "Quiero mi Colección →",
+    "{CTA_TEXT}":         "Quiero mi Colección",
     "{FEATURED_REVIEW}":  "El kit me permitió probar varios sabores y repito cada mes.",
     "{REVIEWER_NAME}":    "Ana L.",
     "{PRECIO}":           "$62.970",
@@ -178,7 +178,7 @@ img{max-width:100%;display:block}
 .testi-stars{color:var(--do);font-size:.95rem;margin-bottom:12px}
 .testi-text{font-style:italic;color:var(--tx);line-height:1.65;
             margin-bottom:16px;font-size:.97rem}
-.testi-author{font-family:system-ui,sans-serif;font-size:.85rem;
+testi-author{font-family:system-ui,sans-serif;font-size:.85rem;
               color:var(--ts);font-weight:bold}
 @media(min-width:768px){.testi-grid{grid-template-columns:repeat(3,1fr)}}
 
@@ -231,7 +231,7 @@ footer{background:#151515;color:rgba(255,255,255,.65);padding:44px 24px 24px}
 
 <!-- SECTION:hero -->
 <section class="hero">
-  <div class="hero-img"><img src="images/coleccion origenes.webp" alt="Colección Orígenes x3 — Essent Tea"></div>
+  <div class="hero-img"><img src="{PRODUCT_IMAGE}" alt="{BUNDLE} — Essent Tea"></div>
   <h1>{HEADLINE}</h1>
   <p>{SUBHEADER}</p>
   <div class="hero-btns">
@@ -452,7 +452,8 @@ def renderizar_landing(template: str, pdp_config: dict) -> str:
 
     # Stock label
     stock_label = ""
-    if copy.get("urgency_copy") and "unit" in copy.get("urgency_copy","").lower():
+    urgency_text = copy.get("urgency_copy", "").lower()
+    if urgency_text and any(token in urgency_text for token in ("unit", "unidad", "unidade", "stock")):
         stock_label = f"⚠️ {copy['urgency_copy']}"
 
     # Urgency copy para banner superior
@@ -470,18 +471,22 @@ def renderizar_landing(template: str, pdp_config: dict) -> str:
     bundle_name = offer.get("bundle_name", "Colección Orígenes x3")
     bundle_desc = bundle_descs.get(bundle_name, offer.get("bundle_description", ""))
 
+    cta_primary = copy.get("cta_primary", PLACEHOLDER_DEFAULTS["{CTA_TEXT}"]).strip()
+    cta_text = cta_primary if cta_primary.endswith("→") else f"{cta_primary} →"
+    reviewer_name = proof.get("reviewer_name", PLACEHOLDER_DEFAULTS["{REVIEWER_NAME}"])
+
     replacements = {
         "{HEADLINE}":        copy.get("headline", PLACEHOLDER_DEFAULTS["{HEADLINE}"]),
         "{SUBHEADER}":       copy.get("subheader", PLACEHOLDER_DEFAULTS["{SUBHEADER}"]),
-        "{CTA_TEXT}":        copy.get("cta_primary", PLACEHOLDER_DEFAULTS["{CTA_TEXT}"]) + " →",
+        "{CTA_TEXT}":        cta_text,
         "{FEATURED_REVIEW}": proof.get("featured_review", PLACEHOLDER_DEFAULTS["{FEATURED_REVIEW}"]),
-        "{REVIEWER_NAME}":   "Cliente verificado/a",
+        "{REVIEWER_NAME}":   reviewer_name,
         "{PRECIO}":          price,
         "{STOCK_LABEL}":     stock_label,
         "{URGENCY_COPY}":    urgency_copy if urgency_level in ("medium", "high") else "",
         "{BUNDLE}":          bundle_name,
         "{BUNDLE_DESC}":     bundle_desc,
-        "{CTA_BUTTON}":      copy.get("cta_primary", PLACEHOLDER_DEFAULTS["{CTA_BUTTON}"]),
+        "{CTA_BUTTON}":      cta_primary,
         "{MARIDAJE}":        f"Maridaje sugerido: {offer.get('pairing_suggestion', 'mate o chocolate amargo')}",
         "{TRUST_BADGE}":     copy.get("trust_badge", PLACEHOLDER_DEFAULTS["{TRUST_BADGE}"]),
         "{SEGMENT_BANNER}":  "",
