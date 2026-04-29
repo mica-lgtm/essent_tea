@@ -1,0 +1,507 @@
+"""
+landing_builder.py — Generador de landing page Essent Tea
+Genera HTML completo con placeholders que los 5 agentes reemplazan.
+"""
+
+# ── Valores por defecto (se usan cuando no hay pdp_config) ───────────────────
+PLACEHOLDER_DEFAULTS = {
+    "{HEADLINE}":         "Descubrí el té que transforma tu ritual diario",
+    "{SUBHEADER}":        "Tés premium en hebras, seleccionados en origen. Para quien sabe lo que quiere.",
+    "{CTA_TEXT}":         "Quiero mi Colección →",
+    "{FEATURED_REVIEW}":  "El kit me permitió probar varios sabores y repito cada mes.",
+    "{REVIEWER_NAME}":    "Ana L.",
+    "{PRECIO}":           "$62.970",
+    "{STOCK_LABEL}":      "",
+    "{URGENCY_COPY}":     "",
+    "{BUNDLE}":           "Colección Orígenes x3",
+    "{BUNDLE_DESC}":      "3 blends únicos para descubrir tu favorito.",
+    "{CTA_BUTTON}":       "Agregar al carrito",
+    "{MARIDAJE}":         "Maridaje sugerido: chocolate amargo y almendras tostadas",
+    "{TRUST_BADGE}":      "Garantía 30 días sin riesgo",
+    "{SEGMENT_BANNER}":   "",
+    "{PRODUCT_IMAGE}":    "images/coleccion origenes.webp",
+}
+
+
+def generar_landing_html() -> str:
+    """Retorna HTML completo de la landing con placeholders."""
+    return """<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Essent Tea — Tés Premium en Hebras | Argentina</title>
+<style>
+:root{
+  --vd:#2D6A4F;--vl:#40916C;--do:#D4A853;--cr:#FAF6EE;--cd:#F0EAD6;
+  --tx:#1A1A1A;--ts:#6B7280;--wh:#FFFFFF;--bd:#E5E0D5;
+  --sh:0 4px 24px rgba(45,106,79,.13);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Georgia,serif;background:var(--cr);color:var(--tx);line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ── HEADER ── */
+.hd{background:var(--vd);padding:10px 24px;display:flex;align-items:center;
+    justify-content:space-between;position:sticky;top:0;z-index:200;
+    box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.hd-logo img{height:44px;width:auto;display:block}
+.hd-logo{color:var(--wh);font-size:1.35rem;font-weight:bold;letter-spacing:-.5px}
+.hd-logo span{color:var(--do)}
+.hd-nav{display:none;gap:28px}
+.hd-nav a{color:rgba(255,255,255,.85);font-size:.88rem;font-family:system-ui,sans-serif;
+          transition:color .2s}
+.hd-nav a:hover{color:var(--do)}
+@media(min-width:768px){.hd-nav{display:flex}}
+
+/* ── URGENCY BANNER ── */
+.ub{background:#C53030;color:var(--wh);text-align:center;padding:10px 16px;
+    font-family:system-ui,sans-serif;font-size:.9rem;font-weight:600;
+    letter-spacing:.3px;display:none}
+.ub.show{display:block}
+.ub.dorado{background:var(--do);color:#1A1A1A}
+
+/* ── HERO ── */
+.hero{padding:56px 24px 48px;text-align:center;
+      background:linear-gradient(160deg,var(--cr) 0%,var(--cd) 100%)}
+.hero h1{font-size:2.1rem;color:var(--vd);line-height:1.22;margin-bottom:18px;
+         max-width:700px;margin-inline:auto}
+.hero p{font-size:1.08rem;color:var(--ts);max-width:580px;margin:0 auto 36px;
+        font-family:system-ui,sans-serif}
+.hero-img{margin:0 auto 36px;max-width:520px;border-radius:20px;
+          overflow:hidden;box-shadow:var(--sh)}
+.hero-img img{width:100%;height:auto;display:block;object-fit:cover}
+.btn-p{display:inline-block;background:var(--vd);color:var(--wh);
+       padding:18px 44px;border-radius:50px;font-size:1.05rem;font-weight:bold;
+       font-family:system-ui,sans-serif;box-shadow:0 4px 16px rgba(45,106,79,.35);
+       transition:transform .15s,box-shadow .15s}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(45,106,79,.4)}
+.btn-s{display:inline-block;border:2px solid var(--vd);color:var(--vd);
+       padding:14px 36px;border-radius:50px;font-size:.95rem;
+       font-family:system-ui,sans-serif;margin-top:14px;transition:background .15s}
+.btn-s:hover{background:var(--vd);color:var(--wh)}
+.hero-btns{display:flex;flex-direction:column;align-items:center;gap:6px}
+
+/* ── TRUST BADGES ── */
+.trust{display:flex;justify-content:center;gap:28px;flex-wrap:wrap;
+       margin-top:36px;background:var(--wh);padding:20px 24px;
+       border-radius:14px;box-shadow:var(--sh);max-width:600px;margin-inline:auto}
+.badge{text-align:center;font-family:system-ui,sans-serif;font-size:.82rem;
+       color:var(--ts);min-width:80px}
+.badge-icon{font-size:1.6rem;margin-bottom:5px}
+.badge-val{font-weight:bold;color:var(--tx);font-size:.95rem}
+
+/* ── SOCIAL PROOF ── */
+.sp{padding:60px 24px;background:var(--vd);color:var(--wh);text-align:center}
+.sp-stars{font-size:1.8rem;margin-bottom:6px}
+.sp-count{font-family:system-ui,sans-serif;font-size:.9rem;
+          opacity:.8;margin-bottom:36px}
+.sp-quote{font-size:1.22rem;font-style:italic;line-height:1.65;
+          max-width:680px;margin:0 auto;padding:0 12px}
+.sp-quote::before{content:'"';font-size:3rem;color:var(--do);
+                  line-height:.5;vertical-align:bottom;margin-right:6px}
+.sp-quote::after{content:'"';font-size:3rem;color:var(--do);
+                 line-height:.5;vertical-align:bottom;margin-left:6px}
+.sp-author{margin-top:22px;font-family:system-ui,sans-serif;
+           font-size:.9rem;opacity:.7}
+
+/* ── BENEFITS ── */
+.benefits{padding:64px 24px}
+.section-title{text-align:center;font-size:1.7rem;color:var(--vd);margin-bottom:8px}
+.section-sub{text-align:center;color:var(--ts);font-family:system-ui,sans-serif;
+             font-size:.95rem;margin-bottom:40px}
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;
+               max-width:860px;margin-inline:auto}
+.bcard{background:var(--wh);border-radius:18px;padding:28px 20px;
+       text-align:center;box-shadow:var(--sh)}
+.bcard-icon{font-size:2.4rem;margin-bottom:14px}
+.bcard h3{color:var(--vd);font-size:1rem;margin-bottom:8px}
+.bcard p{font-family:system-ui,sans-serif;font-size:.88rem;color:var(--ts);
+         line-height:1.55}
+@media(min-width:768px){.benefits-grid{grid-template-columns:repeat(4,1fr)}}
+
+/* ── PRODUCT SECTION ── */
+.product-s{padding:64px 24px;background:var(--cd)}
+.product-card{max-width:820px;margin:28px auto 0;background:var(--wh);
+              border-radius:22px;overflow:hidden;box-shadow:var(--sh)}
+.product-img{overflow:hidden;min-height:260px;display:flex;
+             align-items:center;justify-content:center;
+             background:linear-gradient(135deg,#D4E8D1,#A8D5A2)}
+.product-img img{width:100%;height:100%;object-fit:cover;display:block}
+.product-info{padding:32px 28px}
+.prod-name{font-size:1.5rem;color:var(--vd);margin-bottom:4px}
+.prod-type{font-family:system-ui,sans-serif;font-size:.85rem;
+           color:var(--ts);margin-bottom:16px}
+.stock-lbl{color:#C53030;font-family:system-ui,sans-serif;
+           font-size:.88rem;font-weight:600;margin-bottom:6px}
+.price-big{font-size:2.2rem;font-weight:bold;color:var(--vd);margin:12px 0}
+.urgency-line{color:#C53030;font-family:system-ui,sans-serif;
+              font-size:.9rem;font-weight:600;margin-bottom:14px}
+.bundle-box{background:linear-gradient(135deg,#FFF8E7,#FFF0C2);
+            border:2.5px solid var(--do);border-radius:14px;
+            padding:18px;margin:18px 0}
+.bundle-box h4{color:#7A5213;font-size:.95rem;margin-bottom:5px}
+.bundle-box p{font-family:system-ui,sans-serif;font-size:.88rem;color:#92620A}
+.btn-cta{display:block;background:var(--vd);color:var(--wh);
+         padding:20px;border-radius:50px;font-size:1.1rem;font-weight:bold;
+         font-family:system-ui,sans-serif;text-align:center;
+         margin:24px 0 12px;box-shadow:0 4px 16px rgba(45,106,79,.35);
+         transition:transform .15s}
+.btn-cta:hover{transform:translateY(-2px)}
+.pairing-hint{text-align:center;font-family:system-ui,sans-serif;
+              font-size:.88rem;color:var(--ts);font-style:italic}
+@media(min-width:768px){
+  .product-card{display:grid;grid-template-columns:1fr 1fr}
+  .product-img{height:auto;min-height:340px}
+}
+
+/* ── FAQ ── */
+.faq-s{padding:64px 24px}
+.faq-list{max-width:720px;margin:0 auto}
+.faq-item{border-bottom:1.5px solid var(--bd);padding:22px 0;cursor:pointer}
+.faq-q{font-weight:bold;color:var(--tx);display:flex;
+        justify-content:space-between;align-items:center;
+        font-family:system-ui,sans-serif;font-size:.97rem;gap:12px}
+.faq-icon{color:var(--vd);font-size:1.3rem;flex-shrink:0;transition:transform .25s}
+.faq-a{font-family:system-ui,sans-serif;font-size:.93rem;color:var(--ts);
+       line-height:1.65;margin-top:14px;display:none}
+.faq-a.open{display:block}
+.faq-icon.open{transform:rotate(45deg)}
+
+/* ── TESTIMONIALS ── */
+.testi-s{padding:64px 24px;background:var(--cd)}
+.testi-grid{display:grid;grid-template-columns:1fr;gap:20px;
+            max-width:900px;margin:0 auto}
+.testi-card{background:var(--wh);border-radius:18px;padding:26px;
+            box-shadow:var(--sh)}
+.testi-stars{color:var(--do);font-size:.95rem;margin-bottom:12px}
+.testi-text{font-style:italic;color:var(--tx);line-height:1.65;
+            margin-bottom:16px;font-size:.97rem}
+.testi-author{font-family:system-ui,sans-serif;font-size:.85rem;
+              color:var(--ts);font-weight:bold}
+@media(min-width:768px){.testi-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* ── GUARANTEE ── */
+.guarantee-s{padding:64px 24px;background:var(--vd);color:var(--wh);
+             text-align:center}
+.guarantee-s h2{font-size:1.75rem;margin-bottom:16px}
+.guarantee-s p{font-family:system-ui,sans-serif;opacity:.9;line-height:1.7;
+               max-width:560px;margin-inline:auto;font-size:.97rem}
+.gu-steps{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin-top:36px}
+.gu-step{text-align:center;min-width:100px}
+.gu-step span{font-size:2.8rem;display:block;margin-bottom:8px}
+.gu-step p{font-family:system-ui,sans-serif;font-size:.82rem;opacity:.8}
+
+/* ── FOOTER ── */
+footer{background:#151515;color:rgba(255,255,255,.65);padding:44px 24px 24px}
+.ft-inner{max-width:900px;margin:0 auto;display:grid;
+          grid-template-columns:1fr 1fr;gap:40px}
+.ft-brand{font-size:1.35rem;color:var(--wh);font-weight:bold;margin-bottom:12px}
+.ft-brand small{font-size:.8rem;opacity:.6;display:block;margin-top:4px;font-weight:normal}
+.ft-links a{display:block;color:rgba(255,255,255,.55);font-family:system-ui,sans-serif;
+            font-size:.87rem;margin-bottom:8px;transition:color .2s}
+.ft-links a:hover{color:var(--do)}
+.ft-social{display:flex;gap:14px;margin-top:18px}
+.ft-social a{width:36px;height:36px;background:rgba(255,255,255,.1);
+             border-radius:50%;display:flex;align-items:center;
+             justify-content:center;font-size:1.1rem;transition:background .2s}
+.ft-social a:hover{background:var(--do)}
+.ft-bottom{text-align:center;padding-top:22px;margin-top:28px;
+           border-top:1px solid rgba(255,255,255,.08);
+           font-size:.78rem;font-family:system-ui,sans-serif;color:rgba(255,255,255,.35)}
+@media(max-width:767px){.ft-inner{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- SECTION:urgency-banner -->
+<div class="ub" id="urgency-banner">{URGENCY_COPY}</div>
+
+<!-- SECTION:header -->
+<header class="hd">
+  <a class="hd-logo" href="#"><img src="images/logoweb.webp" alt="Essent Tea"></a>
+  <nav class="hd-nav">
+    <a href="#product">Productos</a>
+    <a href="#benefits">Beneficios</a>
+    <a href="#faq">FAQ</a>
+    <a href="#guarantee">Garantía</a>
+  </nav>
+</header>
+
+<!-- SECTION:hero -->
+<section class="hero">
+  <div class="hero-img"><img src="images/coleccion origenes.webp" alt="Colección Orígenes x3 — Essent Tea"></div>
+  <h1>{HEADLINE}</h1>
+  <p>{SUBHEADER}</p>
+  <div class="hero-btns">
+    <a href="#product" class="btn-p">{CTA_TEXT}</a>
+    <a href="#testimonials" class="btn-s">Leer más reseñas</a>
+  </div>
+  <div class="trust" style="margin-top:36px">
+    <div class="badge"><div class="badge-icon">⭐</div><div class="badge-val">4.8</div>Calificación</div>
+    <div class="badge"><div class="badge-icon">👥</div><div class="badge-val">347</div>Clientes</div>
+    <div class="badge"><div class="badge-icon">🚚</div><div class="badge-val">Gratis</div>Envío</div>
+    <div class="badge"><div class="badge-icon">🛡️</div><div class="badge-val">30 días</div>Garantía</div>
+  </div>
+</section>
+
+<!-- SECTION:social-proof -->
+<section class="sp" id="social-proof">
+  <div class="sp-stars">⭐⭐⭐⭐⭐</div>
+  <div class="sp-count">Más de 347 clientes felices en Argentina</div>
+  <p class="sp-quote">{FEATURED_REVIEW}</p>
+  <div class="sp-author">— {REVIEWER_NAME}, cliente verificada</div>
+</section>
+
+<!-- SECTION:benefits -->
+<section class="benefits" id="benefits">
+  <h2 class="section-title">¿Por qué Essent Tea?</h2>
+  <p class="section-sub">Tés en hebras de calidad premium, para cada momento del día</p>
+  <div class="benefits-grid">
+    <div class="bcard">
+      <div class="bcard-icon">🌿</div>
+      <h3>Descubrí tu sabor</h3>
+      <p>Blends únicos diseñados para cada estado de ánimo: energía, relax, digestión y más.</p>
+    </div>
+    <div class="bcard">
+      <div class="bcard-icon">💚</div>
+      <h3>Ritual de bienestar</h3>
+      <p>Ingredientes premium seleccionados en origen. Sin aditivos, sin rellenos. Solo té real.</p>
+    </div>
+    <div class="bcard">
+      <div class="bcard-icon">🎁</div>
+      <h3>Regalo perfecto</h3>
+      <p>Presentación cuidada y elegante. Ideal para sorprender a alguien especial con estilo.</p>
+    </div>
+    <div class="bcard">
+      <div class="bcard-icon">🛡️</div>
+      <h3>Garantía total</h3>
+      <p>30 días para probarlo. Si no te enamora, te devolvemos el dinero. Sin preguntas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION:product -->
+<section class="product-s" id="product">
+  <h2 class="section-title">Nuestro producto destacado</h2>
+  <p class="section-sub">Elegido por exploradores, amantes de la salud y regaleros por igual</p>
+  <div class="product-card">
+    <div class="product-img"><img src="{PRODUCT_IMAGE}" alt="{BUNDLE}"></div>
+    <div class="product-info">
+      <div class="prod-name">{BUNDLE}</div>
+      <div class="prod-type">Tés premium en hebras · Essent Tea Argentina</div>
+      <div class="stock-lbl" id="stock-label">{STOCK_LABEL}</div>
+      <div class="price-big">{PRECIO}</div>
+      <div class="urgency-line" id="urgency-line"></div>
+      <div class="bundle-box">
+        <h4>🎯 {TRUST_BADGE}</h4>
+        <p>{BUNDLE_DESC}</p>
+      </div>
+      <a href="#" class="btn-cta" id="cta-btn">{CTA_BUTTON}</a>
+      <p class="pairing-hint">✨ {MARIDAJE}</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION:faq -->
+<section class="faq-s" id="faq">
+  <h2 class="section-title">Preguntas frecuentes</h2>
+  <p class="section-sub">Todo lo que necesitás saber antes de tu primer pedido</p>
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <div class="faq-q">¿Cómo se prepara el té en hebras?
+        <span class="faq-icon">+</span></div>
+      <div class="faq-a">Es muy simple: usá un infusor o colador, agregá 1 cucharadita de té por taza de agua a 80–90°C (verde) o 95°C (negro). Dejá reposar 3–5 minutos y listo. Una cucharadita rinde hasta 2–3 preparaciones.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Hacen envíos a todo el país?
+        <span class="faq-icon">+</span></div>
+      <div class="faq-a">Sí, hacemos envíos a todo Argentina. El envío es GRATIS para pedidos a partir de $20.000. El tiempo de entrega es de 3–7 días hábiles según tu zona.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Cómo funciona la garantía de 30 días?
+        <span class="faq-icon">+</span></div>
+      <div class="faq-a">Simple: si dentro de los 30 días desde tu compra el producto no te convence por cualquier razón, nos contactás por WhatsApp o email y te devolvemos el dinero completo. Sin trámites, sin preguntas, sin vueltas.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Los tés tienen cafeína?
+        <span class="faq-icon">+</span></div>
+      <div class="faq-a">Depende del blend: Blueberry Top y Golden Harmony tienen cafeína natural (té negro y verde). Enchanted Fruits es 100% herbal y NO tiene cafeína, ideal para tomar de noche. La Colección Orígenes x3 incluye blends de ambos tipos.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo mezclar los tés con mate?
+        <span class="faq-icon">+</span></div>
+      <div class="faq-a">¡Sí! Golden Harmony especialmente queda increíble mezclado con yerba mate. Muchos de nuestros clientes usan 1 cucharadita de té en hebras mezclada directamente en el mate. El resultado es una explosión de sabores única.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SECTION:testimonials -->
+<section class="testi-s" id="testimonials">
+  <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+  <p class="section-sub">Reseñas reales de compradores verificados</p>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testi-text">"El Blueberry Top es lo más: el toque dulce natural resalta y con almendras tostadas queda increíble. Se volvió mi favorito de las tardes."</p>
+      <div class="testi-author">🧑 Martina R. · Buenos Aires</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testi-text">"Compré el kit con taza y cuchara y la experiencia es maravillosa. Ideal para regalar. La presentación es impecable, se nota que trabajan con amor."</p>
+      <div class="testi-author">🧑 Jorge M. · Córdoba</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testi-text">"El pack de degustación me permitió descubrir nuevos sabores sin arriesgar. Ahora tengo mi ritual de mañana con Golden Harmony y no lo cambio por nada."</p>
+      <div class="testi-author">🧑 Valentina S. · Rosario</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION:guarantee -->
+<section class="guarantee-s" id="guarantee">
+  <h2>🛡️ Comprá sin riesgo</h2>
+  <p>Si probás nuestro té durante 30 días y no te enamora, te devolvemos el dinero completo. Sin preguntas, sin trámites, sin demoras. Así de simple.</p>
+  <div class="gu-steps">
+    <div class="gu-step"><span>🛒</span><p>Comprá online</p></div>
+    <div class="gu-step"><span>🍵</span><p>Probalo 30 días</p></div>
+    <div class="gu-step"><span>💚</span><p>Si no te copa...</p></div>
+    <div class="gu-step"><span>💰</span><p>Devolución total</p></div>
+  </div>
+</section>
+
+<!-- SECTION:footer -->
+<footer>
+  <div class="ft-inner">
+    <div>
+      <div class="ft-brand"><img src="images/logoweb.webp" alt="Essent Tea" style="height:36px;filter:brightness(0) invert(1);margin-bottom:6px"><small>Tés premium en hebras · Argentina</small></div>
+      <div class="ft-social">
+        <a href="#" title="Instagram">📸</a>
+        <a href="#" title="WhatsApp">💬</a>
+        <a href="#" title="Facebook">👤</a>
+      </div>
+    </div>
+    <div class="ft-links">
+      <a href="#">Inicio</a>
+      <a href="#product">Productos</a>
+      <a href="#faq">Preguntas frecuentes</a>
+      <a href="#guarantee">Política de devoluciones</a>
+      <a href="#">Contacto</a>
+    </div>
+  </div>
+  <div class="ft-bottom">© 2026 Essent Tea Argentina · Todos los derechos reservados</div>
+</footer>
+
+<script>
+// ── FAQ Accordion ──
+document.querySelectorAll('.faq-item').forEach(function(item){
+  item.addEventListener('click',function(){
+    var ans=this.querySelector('.faq-a');
+    var ico=this.querySelector('.faq-icon');
+    var isOpen=ans.classList.contains('open');
+    document.querySelectorAll('.faq-a').forEach(function(a){a.classList.remove('open')});
+    document.querySelectorAll('.faq-icon').forEach(function(i){i.classList.remove('open')});
+    if(!isOpen){ans.classList.add('open');ico.classList.add('open')}
+  });
+});
+
+// ── Urgency banner visibility ──
+(function(){
+  var ub=document.getElementById('urgency-banner');
+  if(ub && ub.textContent.trim().length>2){ub.classList.add('show')}
+  var stk=document.getElementById('stock-label');
+  if(stk && stk.textContent.trim().length<2){stk.style.display='none'}
+})();
+</script>
+</body>
+</html>"""
+
+
+# ── Renderizador: reemplaza placeholders con output de los agentes ────────────
+
+def renderizar_landing(template: str, pdp_config: dict) -> str:
+    """
+    Toma el HTML template y reemplaza todos los placeholders con los
+    outputs reales de los 5 agentes (pdp_config de generate_pdp()).
+    """
+    offer   = pdp_config.get("offer", {})
+    copy    = pdp_config.get("copy", {})
+    proof   = pdp_config.get("social_proof", {})
+
+    # Mapa producto → imagen
+    product_images = {
+        "coleccion_origenes_x3": "images/coleccion origenes.webp",
+        "blueberry_top":         "images/blueberry top.webp",
+        "golden_harmony":        "images/golden harmony.webp",
+        "enchanted_fruits":      "images/enchanted fruits.webp",
+    }
+    product_id    = pdp_config.get("metadata", {}).get("product_id", "coleccion_origenes_x3")
+    product_image = product_images.get(product_id, "images/coleccion origenes.webp")
+
+    # Precio con descuento leal
+    segment = pdp_config.get("segmentation", {}).get("segment", "")
+    price   = offer.get("bundle_price_formatted", "$62.970")
+
+    # Stock label
+    stock_label = ""
+    if copy.get("urgency_copy") and "unit" in copy.get("urgency_copy","").lower():
+        stock_label = f"⚠️ {copy['urgency_copy']}"
+
+    # Urgency copy para banner superior
+    urgency_level = offer.get("urgency_level", "none")
+    urgency_copy  = copy.get("urgency_copy", "")
+
+    # Bundle desc
+    bundle_descs = {
+        "Kit Explorador":     "Explorá todos los sabores con infusor premium incluido.",
+        "Plan Salud Mensual": "Recibí tu té cada mes automáticamente con precio de suscriptor.",
+        "Kit Regalo Premium": "Presentación impecable lista para regalar con tarjeta incluida.",
+        "Compra Sin Riesgo":  "Si no te enamora en 30 días, te devolvemos todo. Sin preguntas.",
+        "Descuento Fidelidad":"Tu 15% de descuento exclusivo por ser cliente frecuente.",
+    }
+    bundle_name = offer.get("bundle_name", "Colección Orígenes x3")
+    bundle_desc = bundle_descs.get(bundle_name, offer.get("bundle_description", ""))
+
+    replacements = {
+        "{HEADLINE}":        copy.get("headline", PLACEHOLDER_DEFAULTS["{HEADLINE}"]),
+        "{SUBHEADER}":       copy.get("subheader", PLACEHOLDER_DEFAULTS["{SUBHEADER}"]),
+        "{CTA_TEXT}":        copy.get("cta_primary", PLACEHOLDER_DEFAULTS["{CTA_TEXT}"]) + " →",
+        "{FEATURED_REVIEW}": proof.get("featured_review", PLACEHOLDER_DEFAULTS["{FEATURED_REVIEW}"]),
+        "{REVIEWER_NAME}":   "Cliente verificado/a",
+        "{PRECIO}":          price,
+        "{STOCK_LABEL}":     stock_label,
+        "{URGENCY_COPY}":    urgency_copy if urgency_level in ("medium", "high") else "",
+        "{BUNDLE}":          bundle_name,
+        "{BUNDLE_DESC}":     bundle_desc,
+        "{CTA_BUTTON}":      copy.get("cta_primary", PLACEHOLDER_DEFAULTS["{CTA_BUTTON}"]),
+        "{MARIDAJE}":        f"Maridaje sugerido: {offer.get('pairing_suggestion', 'mate o chocolate amargo')}",
+        "{TRUST_BADGE}":     copy.get("trust_badge", PLACEHOLDER_DEFAULTS["{TRUST_BADGE}"]),
+        "{SEGMENT_BANNER}":  "",
+        "{PRODUCT_IMAGE}":   product_image,
+    }
+
+    html = template
+    for ph, val in replacements.items():
+        html = html.replace(ph, str(val) if val else "")
+    return html
+
+
+if __name__ == "__main__":
+    html = generar_landing_html()
+    print(f"✅ Landing generada: {len(html):,} caracteres, {len(html.splitlines())} líneas")
+
+    # Ejemplo con defaults
+    for ph, val in PLACEHOLDER_DEFAULTS.items():
+        html = html.replace(ph, val)
+
+    with open("/tmp/landing_v1.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    print("   Guardada en: /tmp/landing_v1.html")
